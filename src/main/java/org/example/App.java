@@ -19,18 +19,21 @@ public class App extends Application {
     public void start(Stage primaryStage) throws SQLException {
 
         DatabaseService  databaseService = new DatabaseService(DatabaseManager.getConnection());
-        boolean isNewDatabase = databaseService.setupDatabase();
+        boolean isNewDatabase = databaseService.isNewDatabase();
+
 
         Button checkButton = new Button("Verificar Estado");
-
         checkButton.setOnAction(e -> {
             if (isNewDatabase) {
                 showAlert();
-                chooseFile(primaryStage);
+                String fileName = chooseFile(primaryStage);
+                databaseService.setupDatabase(fileName);
+
             } else {
-                System.out.println("A base de dados não está vazia.");
+                System.out.println("A base ja existe.");
             }
         });
+
 
         VBox vbox = new VBox(checkButton);
         Scene scene = new Scene(vbox, 400, 400);
@@ -48,15 +51,16 @@ public class App extends Application {
         alert.showAndWait();
     }
 
-    private void chooseFile(Stage stage) {
+    private String chooseFile(Stage stage) {
         FileChooser fileChooser = new FileChooser();
         fileChooser.getExtensionFilters().add(new FileChooser.ExtensionFilter("Ficheiros Excel", "*.xls", "*.xlsx"));
 
         File selectedFile = fileChooser.showOpenDialog(stage);
 
         if (selectedFile != null) {
-            System.out.println("Ficheiro selecionado: " + selectedFile.getAbsolutePath());
+            return selectedFile.getAbsolutePath();
         }
+        return null;
     }
 
 
