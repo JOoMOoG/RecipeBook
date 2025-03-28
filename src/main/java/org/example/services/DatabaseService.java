@@ -1,6 +1,7 @@
 package org.example.services;
 
 import org.example.databaseManager.DataFileManager;
+import org.example.models.Recipe;
 
 import java.sql.*;
 import java.util.ArrayList;
@@ -104,7 +105,8 @@ public class DatabaseService {
         String sqlRecipes = "CREATE TABLE IF NOT EXISTS recipes (" +
                 "id INTEGER PRIMARY KEY, " +
                 "name TEXT NOT NULL, " +
-                "description TEXT);";
+                "portions INTEGER NOT NULL, " +
+                "category TEXT NOT NULL);";
 
         String sqlIngredients = "CREATE TABLE IF NOT EXISTS ingredients (" +
                 "id INTEGER PRIMARY KEY, " +
@@ -138,6 +140,9 @@ public class DatabaseService {
     private void populateTables(String fileName) {
         System.out.println("Populating from " + fileName);
         ArrayList<String[]> recipes = dataFileManager.readRecipes(fileName);
+        for(String[] recipe: recipes){
+            System.out.println(Arrays.toString(recipe));
+        }
 
     }
 

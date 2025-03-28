@@ -1,37 +1,66 @@
 package org.example.databaseManager;
 
 import org.apache.poi.hssf.usermodel.HSSFWorkbook;
-import org.apache.poi.ss.usermodel.Cell;
-import org.apache.poi.ss.usermodel.Row;
-import org.apache.poi.ss.usermodel.Sheet;
-import org.apache.poi.ss.usermodel.Workbook;
+import org.apache.poi.openxml4j.exceptions.InvalidFormatException;
+import org.apache.poi.ss.usermodel.*;
+import org.example.models.Ingredient;
 import org.example.models.Recipe;
 
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.List;
 
 public class DataFileManager {
+    public static void importExcel(String filePath) {
+        try (FileInputStream fis = new FileInputStream(new File(filePath));
+             Workbook workbook = WorkbookFactory.create(fis)) {
 
-    public ArrayList<String[]> readRecipes(String fileName) {
-        ArrayList<String[]> recipes = new ArrayList<String[]>();
-        try (FileInputStream fis = new FileInputStream(new File(fileName));
-             Workbook workbook = new HSSFWorkbook(fis)) {
+            for (Sheet sheet : workbook) {
+                String sheetName = sheet.getSheetName().toLowerCase();
 
-            Sheet sheet = workbook.getSheetAt(0);
+                switch (sheetName) {
+                    case "ingredientes":
+                        List<Ingredient> ingredients = processIngredients(sheet);
+                        System.out.println("Ingredientes carregados: " + ingredients.size());
+                        break;
 
-            for (Row row : sheet) {
-                String[] recipe = new String[2];
-                for (int i = 0; i < row.getLastCellNum() ; i++) {
-                    recipe[i] = row.getCell(i).getStringCellValue();
+                    case "receitas":
+                        List<Receita> receitas = processarReceitas(sheet);
+                        System.out.println("Receitas carregadas: " + receitas.size());
+                        break;
+
+                    case "receitas_calorias":
+                        List<IngredientePorReceita> ingredientesPorReceita = processarIngredientesPorReceita(sheet);
+                        System.out.println("Ingredientes por receita carregados: " + ingredientesPorReceita.size());
+                        break;
+
+                    case "passos":
+                        List<PassoReceita> passos = processarPassosReceita(sheet);
+                        System.out.println("Passos carregados: " + passos.size());
+                        break;
+
+                    default:
+                        System.out.println("Folha ignorada: " + sheetName);
                 }
-
-                recipes.add(recipe);
             }
-        } catch (IOException e) {
-            System.out.println("Error reading  recipes from file " + fileName);
+        } catch (Exception e) {
+            e.printStackTrace();
         }
-        return recipes;
+    }
+    private static List<Ingredient> processIngredients(Sheet sheet) {
+        List<Ingredient> ingredients = new ArrayList<>();
+        for (Row row : sheet) {
+            if (row.getRowNum() == 0) continue;
+            Ingredient ingredient = new Ingredient();
+            ingredient.setId(Integer.parseInt(row.getCell(0).getStringCellValue()));
+            ingredient.setFats();
+            ingredients.add(new Ingredient(
+                    row.getCell(0).getStringCellValue(),
+                    row.getCell(1).getStringCellValue()
+            ));
+        }
+        return ingredientes;
     }
 }
